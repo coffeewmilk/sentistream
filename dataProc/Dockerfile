@@ -23,10 +23,11 @@ RUN mkdir -p "${SPARK_EXTRA_JARS_DIR}"
 # pre-download package dependencies
 RUN apt install -y openjdk-17-jdk
 # ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+COPY pom.xml .
+
 ENV PATH=${PATH}:${pwd}/apache-maven-3.9.6/bin
 RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz \
     && tar xzvf apache-maven-3.9.6-bin.tar.gz \
-    && wget https://repo1.maven.org/maven2/com/johnsnowlabs/nlp/spark-nlp_2.12/5.3.3/spark-nlp_2.12-5.3.3.pom -O pom.xml \
     && mvn dependency:copy-dependencies -DoutputDirectory=${SPARK_EXTRA_JARS_DIR} -f pom.xml 
 
 
