@@ -41,9 +41,10 @@ RUN bash Miniconda3-py39_4.10.3-Linux-x86_64.sh -b -p /opt/miniconda3 \
   && ${CONDA_HOME}/bin/conda config --system --set auto_update_conda False \
   && ${CONDA_HOME}/bin/conda config --system --prepend channels conda-forge \
   && ${CONDA_HOME}/bin/conda config --system --set channel_priority strict
+
 # Packages ipython and ipykernel are required if using custom conda and want to
 # use this container for running notebooks.
-RUN ${CONDA_HOME}/bin/conda install ipython ipykernel
+# RUN ${CONDA_HOME}/bin/conda install ipython ipykernel
 
 # (Optional) Install Conda packages.
 #
