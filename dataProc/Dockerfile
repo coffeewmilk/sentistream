@@ -99,7 +99,8 @@ RUN ${CONDA_HOME}/bin/conda install mamba -n base -c conda-forge \
       sqlalchemy \
       sympy \
       virtualenv \
-      spark-nlp 
+      spark-nlp \
+      firebase-admin
 
 
 # (Optional) Add extra Python modules.
