@@ -15,21 +15,21 @@ class Task():
     
     _status = "pending"
 
-    def __init__(self, req):
+    def __init__(self, data):
         # initiate variable
-        self._url = req.data["url"]
-        self._videoId = req.data["videoId"]
-        self._title = req.data["title"]
-        self._lengthSeconds = req.data["lengthSeconds"]
-        self._channelId = req.data["channelId"]
-        self._viewCount = req.data["viewCount"]
-        self._author = req.data["author"]
+        self._url = data["url"]
+        self._videoId = data["videoId"]
+        self._title = data["title"]
+        self._lengthSeconds = data["lengthSeconds"]
+        self._channelId = data["channelId"]
+        self._viewCount = data["viewCount"]
+        self._author = data["author"]
 
         # Create document in firestore
         self._status = "created"
         self.doc_ref = db.collection("AnalyzeData").document(self._videoId)
         self.doc_ref.set({"status": self._status})
-        self.doc_ref.update(dict(req.data))
+        self.doc_ref.update(data)
 
     def _setStatus(self, status):
         self._status = status
@@ -50,7 +50,7 @@ class Task():
         return self.batch_uuid
     
     def reportFailure(self, message):
-        self._setStatus = "Failed"
+        self._setStatus("Failed")
         self.doc_ref.update({"error": message})
     
     # Just leave it for the user to trigger it again!
