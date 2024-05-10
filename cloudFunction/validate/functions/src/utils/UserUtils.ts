@@ -1,6 +1,5 @@
-import { doc, collection, getDoc, setDoc, addDoc, query, where, getCountFromServer } from "firebase/firestore";
-import { Firestore, Timestamp } from "firebase/firestore";
-import { CollectionReference } from "firebase/firestore";
+import { Firestore, Timestamp, CollectionReference } from "firebase-admin/firestore";
+
 
 export class User {
     public readonly userID: string
@@ -14,12 +13,12 @@ export class User {
 
     public async create() {
         // check if this user is already in firestore (This could be implement with listener)
-        const userRef = doc(this.db, "User", this.userID)
-        const userSnap = await getDoc(userRef)
-        if (!userSnap.exists()) {
-            setDoc(userRef, { userID: this.userID })
+        const userRef = this.db.collection('User').doc(this.userID)
+        const userSnap = await userRef.get()
+        if (!userSnap.exists) {
+            await userRef.set({ userID: this.userID })
         }
-        this.queryRef = collection(this.db, "User", this.userID, "Query")
+        this.queryRef = this.db.collection("User").doc(this.userID).collection("Query")
     }
 
     public async addQuery( vid: string, batchID: string = "") {
@@ -46,7 +45,7 @@ export class User {
                 }
             }
         
-        await addDoc(this.queryRef, queryLog)
+        await this.queryRef.add(queryLog)
     }
 
     public async exceedQuota() {
@@ -58,12 +57,12 @@ export class User {
         const quotaHours = 24;
         const quotaStartTime = new Date(currentTime.getTime() - quotaHours*60*60000);
         
-        const q = query(this.queryRef, 
-                        where("timestamp", "<", Timestamp.fromDate(currentTime)), 
-                        where("timestamp", ">=", Timestamp.fromDate(quotaStartTime))
-                    )
+        const q = this.queryRef
+                        .where("timestamp", "<", Timestamp.fromDate(currentTime))
+                        .where("timestamp", ">=", Timestamp.fromDate(quotaStartTime))
+                    
 
-        const count = await getCountFromServer(q)
+        const count = await q.count().get();
         return count.data().count
         
     }

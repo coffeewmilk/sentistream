@@ -90,10 +90,18 @@ const resolveInitialData = (watchHtml: string) => {
 //     }
 //     return undefined
 // }
-
+export interface metaData {
+    url : string;
+    videoId: string;
+    title: string;
+    lengthSeconds: string;
+    channelId: string;
+    viewCount: string;
+    author: string;
+}
 
 // this is the modified version of the function form https://github.com/dangdungcntt/youtube-stream-url/tree/master
-const urlValidation = async ( url: string ) => {
+export const urlValidation = async ( url: string ): Promise<metaData> => {
 
     let videoId = getVideoId(url);
 
@@ -149,4 +157,4 @@ const urlValidation = async ( url: string ) => {
     }
 };
 
-export default urlValidation
+
