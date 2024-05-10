@@ -15,30 +15,43 @@ class Task():
     
     _status = "pending"
 
-    def __init__(self, vid, url):
-        self.vid = vid
-        self.url = url
+    def __init__(self, req):
+        # initiate variable
+        self._url = req.data["url"]
+        self._videoId = req.data["videoId"]
+        self._title = req.data["title"]
+        self._lengthSeconds = req.data["lengthSeconds"]
+        self._channelId = req.data["channelId"]
+        self._viewCount = req.data["viewCount"]
+        self._author = req.data["author"]
+
+        # Create document in firestore
         self._status = "created"
-        self.doc_ref = db.collection("AnalyzeData").document(vid)
-        self.doc_ref.set({"status": self._status, "metaData": {"url": url}, "data": ""})
+        self.doc_ref = db.collection("AnalyzeData").document(self._videoId)
+        self.doc_ref.set({"status": self._status})
+        self.doc_ref.update(dict(req.data))
 
     def _setStatus(self, status):
         self._status = status
         self.doc_ref.update({"status": status})
     
     def downloadChat(self):
-        self.chat = download_chat(self.url)
+        self.chat = download_chat(self._url)
         self._setStatus("Chat downloaded")
     
     def uploadToBucket(self):
-        upload_blob(self.chat, self.vid)
+        upload_blob(self.chat, self._videoId)
         self._setStatus("Chat uploaded to bucket")
     
     def submitSparkBatch(self):
-        self.batchOperation = submit_batch(vid=self.vid)
+        self.batch_uuid = submit_batch(vid=self._videoId)
         self._setStatus("Spark Batch Submitted")
         # no longer wait for the result
-        #result =  self.batchOperation.result()
+        return self.batch_uuid
+    
+    def reportFailure(self, message):
+        self._setStatus = "Failed"
+        self.doc_ref.update({"error": message})
     
     # Just leave it for the user to trigger it again!
     # def cleanOnError(self):

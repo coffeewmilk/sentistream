@@ -1,4 +1,5 @@
 from google.cloud import dataproc_v1
+import time
 
 def submit_batch(vid, bucket_name="sentistream"):
     
@@ -27,7 +28,7 @@ def submit_batch(vid, bucket_name="sentistream"):
     batch.pyspark_batch.args = [f"--input_path={input_path}", 
                                 f"--output_path={output_path}", 
                                 f"--bucket_name={bucket_name}",
-                                f"----firestore_ref={vid}"]
+                                f"--firestore_ref={vid}"]
     batch.runtime_config.version = "1.2"
     batch.runtime_config.container_image = "asia-southeast1-docker.pkg.dev/sentistream-420115/dataproc-artifacts/spark-nlp-image:0.0.4"
 
@@ -41,7 +42,26 @@ def submit_batch(vid, bucket_name="sentistream"):
 
 
     #response = operation.result()
+    batch_uuid = operation.metadata.batch_uuid
+
+    # track progress of the batch make sure it is creating all right
+    resultRequest = dataproc_v1.GetBatchRequest(
+        name = f"projects/sentistream-420115/locations/asia-southeast1/batches/{batch_uuid}"
+    )
+
+    batchStatus = 0 #todo Implement timeout
+    while batchStatus < 2:
+        resultBatch = client.get_batch(request=resultRequest)
+        batchStatus = resultBatch.state
+        
+        if batchStatus == 6:
+            # batch failed
+            raise Exception('Batch failed') #todo add more details
+
+        print("message:",resultBatch.state_message, "time:", resultBatch.state_time, "code:", batchStatus)
+        time.sleep(10)
+
 
     # Handle the response
-    return operation
+    return batch_uuid
 
