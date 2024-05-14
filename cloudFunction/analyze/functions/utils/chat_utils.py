@@ -17,8 +17,8 @@ schema = make_avsc_object({"namespace": "chat.avro",
                             ]})
 
 storage_client = storage.Client(project="sentistream-420115")
-bucket = storage_client.bucket("sentistream")
-
+# bucket = storage_client.bucket("sentistream")
+bucket = storage_client.bucket("sentistream-420115.appspot.com")
 
 def download_chat(url):
     buffer = io.BytesIO()
