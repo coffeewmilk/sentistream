@@ -44,7 +44,7 @@ class Task():
         self._setStatus("Chat uploaded to bucket")
     
     def submitSparkBatch(self):
-        self.batch_uuid = submit_batch(vid=self._videoId)
+        self.batch_uuid = submit_batch(vid=self._videoId, bucket_name="sentistream-420115.appspot.com")
         self._setStatus("Spark Batch Submitted")
         # no longer wait for the result
         return self.batch_uuid
