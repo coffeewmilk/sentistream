@@ -80,9 +80,10 @@ class Status:
 
 inputPath = f"gs://{args.bucket_name}/{args.input_path}"
 outputPath = f"gs://{args.bucket_name}/{args.output_path}"
-status = Status(firestore_ref)
 
 try: 
+    status = Status(firestore_ref)
+
     spark = SparkSession.builder.appName("sentiment_analysis_batch") \
                                 .getOrCreate()
 
