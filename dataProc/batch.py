@@ -86,7 +86,7 @@ try:
     spark = SparkSession.builder.appName("sentiment_analysis_batch") \
                                 .getOrCreate()
 
-    read = spark.read.format("avro").load(inputPath).withColumnRenamed("message", "text")
+    read = spark.read.format("avro").load(inputPath).withColumnRenamed("message", "text").dropna()
 
 
     pipelineLocation = "gs://sentistream/dependencies/analyze_sentiment_en_4.4.2_3.2_1685186425752"
