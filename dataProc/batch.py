@@ -96,7 +96,8 @@ try:
 
     result = pipeline.transform(read)
     finished = finisher.transform(result)
-    highest_sentiment = finished.withColumn("finished_sentiment", finished.finished_sentiment[0])
+    highest_sentiment = finished.withColumn("finished_sentiment", finished.finished_sentiment[0]) \
+                                .dropna()
 
     highest_sentiment.write.format('json') \
                         .mode('overwrite') \
