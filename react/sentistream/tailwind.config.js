@@ -15,6 +15,7 @@ export default {
       'blue-dark': '#182335',
       'blue-light': '#324A6D',
       'blue-dark2': '#0E1521',
+      'blue-light2': '#5A7BD1',
       'white-yellow': '#EAE4CC',
       'red-dark': '#AA3326',
       'red-light': '#EEAF9D',

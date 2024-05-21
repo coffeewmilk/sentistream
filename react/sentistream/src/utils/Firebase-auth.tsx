@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut as _signout } from "firebase/auth";
-
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut as _signout, sendEmailVerification } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 // TODO: Replace the following with your app's Firebase project configuration
 // See: https://firebase.google.com/docs/web/learn-more#config-object
@@ -20,15 +20,23 @@ export const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
+// Initialize database 
+export const db = getFirestore(app);
 
 export async function signIn({email, password}: {email: string, password: string}) {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential
 }
 
-export async function register({email, password, rePassword}: {email: string, password: string, rePassword: string}) {
+export async function register({email, password}: {email: string, password: string}) {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     return userCredential
+}
+
+export async function verifyEmail() {
+    if (auth.currentUser) {
+        await sendEmailVerification(auth.currentUser)
+    }
 }
 
 export async function signOut() {

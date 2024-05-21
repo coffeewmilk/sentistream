@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../utils/Firebase";
+import { auth } from "../utils/Firebase-auth";
 import { ErrorBoundary } from "react-error-boundary";
-import { signIn, register, signOut } from "../utils/Firebase";
+import { signIn, register, signOut, verifyEmail } from "../utils/Firebase-auth";
 import firebase from "firebase/compat/app";
 
 
@@ -12,7 +12,7 @@ export default function ProfileMenuWrapper({visible = false}: {visible: boolean}
     const [hasAccount, setHasAccount] = useState<boolean>(true)
 
     useEffect(() => {
-        onAuthStateChanged(auth, (user) => {
+        const unsub = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setIsLogin(true)
             }
@@ -20,11 +20,12 @@ export default function ProfileMenuWrapper({visible = false}: {visible: boolean}
                 setIsLogin(false)
             }
         })
-    });
+        return (() => unsub())
+    }, []);
 
     
     return (
-        <div className={"absolute top-[100px] right-[10px] text-base z-10 " + (visible? "visible": "hidden")}>
+        <div className={"absolute top-[60px] right-[10px] text-base z-10 " + (visible? "visible": "hidden")}>
             {isLogin? <UserMenu/> :(hasAccount? <SignInMenu setHasAccount={setHasAccount}/>: 
                         <RegisterMenu setHasAccount={setHasAccount}/>)}
         </div>
@@ -51,7 +52,7 @@ function SignInMenu( {setHasAccount}: setStatus) {
             <form onSubmit={handleSubmit} className="bg-blue-dark2 w-[374px] rounded-3xl p-4 flex flex-col space-y-8 text-sm">
                 <p> Sign in</p>
                 <DataInputField name="Email address" setInputState={setEmail}/>
-                <DataInputField name="Password" setInputState={setPassword}/>
+                <DataInputField name="Password" setInputState={setPassword} isPassword={true}/>
                 <FormButtonFooter setHasAccount={setHasAccount} hasAccount={true}/>
                 <ErrorDisplay submitError={submitError}/>
             </form>
@@ -67,31 +68,92 @@ function RegisterMenu( {setHasAccount}: setStatus) {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        register({email, password, rePassword}).catch((e) => setSubmitError(e))
+        if (password == rePassword) {
+            register({email, password}).catch((e) => setSubmitError(e))
+        }
     }
     
     return (
-        <ErrorBoundary fallback={<p> Error</p>} >
-            <form onSubmit={handleSubmit} className="bg-blue-dark2 w-[374px] rounded-3xl p-4 flex flex-col space-y-8 text-sm">
-                <p> Register</p>
-                <DataInputField name="Email address" setInputState={setEmail}/>
-                <DataInputField name="Password" setInputState={setPassword} addStyle={(password == rePassword)? "": "outline outline-red-light"}/>
-                <DataInputField name="Re-enter Password" setInputState={setRePassword} addStyle={(password == rePassword)? "": "outline outline-red-light"}/>
-                <FormButtonFooter setHasAccount={setHasAccount} hasAccount={false}/>
-                <ErrorDisplay submitError={submitError}/>
-            </form>
-        </ErrorBoundary>
+        <form onSubmit={handleSubmit} className="bg-blue-dark2 w-[374px] rounded-3xl p-4 flex flex-col space-y-8 text-sm">
+            <p> Register</p>
+            <DataInputField name="Email address" setInputState={setEmail}/>
+            <DataInputField name="Password" 
+                            setInputState={setPassword} 
+                            addStyle={(password == rePassword)? "": "outline outline-red-light"} 
+                            isPassword={true}/>
+
+            <DataInputField name="Re-enter Password" 
+                            setInputState={setRePassword} 
+                            addStyle={(password == rePassword)? "": "outline outline-red-light"} 
+                            isPassword={true}/>
+
+            <FormButtonFooter setHasAccount={setHasAccount} hasAccount={false}/>
+            <ErrorDisplay submitError={submitError}/>
+        </form>
     )
 }
 
 function UserMenu() {
     const userEmail = auth.currentUser?.email
+
+    const [isEmailVerified, setIsEmailVerified] = useState(auth.currentUser?.emailVerified)
+    const [message, setMessage] = useState("")
+
+    function renderVerificationStatus() {
+        if (!isEmailVerified) {
+            return (
+                <div className="text-xs">
+                    <div className="flex flex-row justify-between">
+                        <p>Please verify your Email</p>
+                        <button className="bg-green text-white px-1 rounded-full" onClick={sendEmailVerification}>send</button>
+                    </div>
+                    <p className="text-red-light">{message}</p>
+                </div>
+            )
+        } else {
+            return 
+        }
+    }
+    
+    function checkEmailVerification() {
+        auth.currentUser?.reload().then(
+            () => {
+                if (auth.currentUser?.emailVerified) {
+                    setIsEmailVerified(true)
+                    setMessage("")
+                }
+            }
+        )
+    }
+
+    function sendEmailVerification() {
+        verifyEmail().then(() => setMessage("Verification email is sent"))
+                         .catch((e: unknown) => {
+                            if (e instanceof Error) {
+                                setMessage(e.message)
+                            } else {
+                                setMessage("Undefined error")
+                            }
+                        })
+    }
+    
+    useEffect(() => {
+        if ((isEmailVerified != undefined) && (!isEmailVerified)) {
+            
+            // check every 500ms
+            const intervalId = setInterval(checkEmailVerification, 500)
+            return(() => clearInterval(intervalId))
+        }
+
+
+    }, [isEmailVerified])
     
     return (
-        <div className="bg-blue-dark2 w-[374px] rounded-3xl p-4 flex flex-col space-y-8 text-sm">
-            <p>{userEmail}</p>
+        <div className="bg-blue-dark2 rounded-3xl p-4 flex flex-col space-y-5 text-sm">
+            <p className="border-b-[1px]">{userEmail}</p>
             <UserMenuButton name="Setting"/>
             <UserMenuButton name="Sign out" clickFunction={signOut}/>
+            {renderVerificationStatus()}
         </div>
     )
 }
@@ -102,13 +164,18 @@ function UserMenuButton( {name, clickFunction, addStyle=""}: {name: string, clic
     )
 }
 
-function DataInputField( {name, setInputState, addStyle=""} : {name: string, setInputState: (input:string) => void, addStyle?:string} ) {
+function DataInputField( {name, setInputState, isPassword=false, addStyle=""} : 
+{name: string, setInputState: (input:string) => void, isPassword?:boolean, addStyle?:string} ) {
     const handleChange = (event: React.FormEvent<HTMLInputElement>) => {
         setInputState((event.target as HTMLInputElement).value)
     }
     
     return (
-        <input type="text" name={name} placeholder={name} onChange={handleChange} className={"bg-blue-light text-white text-opacity-50 rounded-full h-[48px] w-[313px] px-4 mx-auto " + addStyle}/>
+        <input type={isPassword? "password": "text"} 
+               name={name} 
+               placeholder={name} 
+               onChange={handleChange} 
+               className={"bg-blue-light text-white text-opacity-50 rounded-full h-[48px] w-[313px] px-4 mx-auto " + addStyle}/>
     )
 }
 
