@@ -11,7 +11,7 @@ export default function SubmissionList( {list}: {list: submission[]}) {
     
     return (
         <div className='fixed bottom-3 right-6 text-end'>
-            <div className={"bg-blue-dark2 rounded-3xl p-4 flex flex-col space-y-5 text-sm " + (isToggle? "visible": "hidden")}>
+            <div className={"bg-blue-dark2 rounded-3xl p-4 flex flex-col space-y-5 text-sm max-h-72 overflow-y-auto " + (isToggle? "visible": "hidden")}>
                 {list.length == 0? "Submit url at the input bar!" : list.map((submisstion) => <SubmissionRow submission={submisstion}/>)}
             </div>
             <button onClick={() => setIsToggle(!isToggle)}>{`${length} submitting`}</button>

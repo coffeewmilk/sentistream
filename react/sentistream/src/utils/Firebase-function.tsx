@@ -1,9 +1,10 @@
-import { getFunctions, connectFunctionsEmulator, httpsCallable } from "firebase/functions";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import { app } from "./Firebase-auth";
+//import { connectFunctionsEmulator } from "firebase/functions";
 
 const functions = getFunctions(app, "asia-southeast1");
 const validate = httpsCallable(functions, 'validate', {timeout: 360000}) //6 min timeout
-connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+//connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 
 export interface submission {
     time: Date
