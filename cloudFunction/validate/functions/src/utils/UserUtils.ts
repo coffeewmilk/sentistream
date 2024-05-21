@@ -2,7 +2,7 @@ import {
   Firestore, Timestamp, CollectionReference,
 } from "firebase-admin/firestore";
 
-import { getAuth } from "firebase-admin/auth";
+import {getAuth} from "firebase-admin/auth";
 
 /**
  * Representation of user
@@ -47,7 +47,7 @@ export class User {
 
     // delete old query if exist
     if ((await this.queryRef.doc(vid).get()).exists) {
-      await this.queryRef.doc(vid).delete()
+      await this.queryRef.doc(vid).delete();
     }
 
     const queryAt = Timestamp.fromDate(new Date());
@@ -96,15 +96,15 @@ export class User {
 
     const count = await q.count().get();
     // 2 calls every 24 hrs
-    return (count.data().count > 2)
+    return (count.data().count > 2);
   }
 
   /**
    * Thie method check if user is email verified
-   * @returns {boolean}
+   * @return {boolean}
    */
   public async emailVerified() {
-    const userData = await getAuth().getUser(this.userID)
-    return userData.emailVerified
+    const userData = await getAuth().getUser(this.userID);
+    return userData.emailVerified;
   }
 }
