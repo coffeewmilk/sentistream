@@ -10,7 +10,7 @@ const firebaseConfig = {
     projectId: "sentistream-420115",
     storageBucket: "sentistream-420115.appspot.com",
     messagingSenderId: "[messagingSenderId]",
-    appId: "1:[messagingSenderId]:web:025c67cc0c6a0b624d9aa9",
+    appId: "[appId]",
     measurementId: "[measurementId]"
   };
 
