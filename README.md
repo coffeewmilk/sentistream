@@ -1,5 +1,5 @@
 # Sentistream: Chat sentimental analyzer
-### Ingest and analyze all in one click!
+### Ingest and analyze all in one click! [Sentistream](https://sentistream-420115.web.app/)
 
 <p float="left" align="middle">
     <img width="49%" src="assets/screenshot-home.png">
@@ -60,7 +60,7 @@ The user exposed function written on NodeJS.
 If everything is verified, The video metadata is then extracted. Next, the function check if the result already exists within the result database, if so, the function add result reference to user database, else, the function trigger analyze function. 
 
 ## Analyze Function
-The python function accessable only fof validation function
+The python function accessable only from validation function
 - ### Ingest
     The function use Chatdownloader library to download chat data and store it in Avro format in cloud storage
 
