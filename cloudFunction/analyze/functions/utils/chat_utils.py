@@ -32,7 +32,7 @@ def download_chat(url):
                         "time_seconds": str(message["time_in_seconds"]),
                         "author_id": message["author"]["id"]})
     
-    buffer.seek(0)
+    writter.flush()
     return buffer
 
 def upload_blob(buffer, vid, destination_blob_name = "analysis/"):
@@ -44,6 +44,7 @@ def upload_blob(buffer, vid, destination_blob_name = "analysis/"):
         bucket.delete_blobs(blobs)
         
     blob.upload_from_string(buffer.getvalue())
+    buffer.close()
 
     print(
         f"{vid} uploaded to {destination_blob_name}."
