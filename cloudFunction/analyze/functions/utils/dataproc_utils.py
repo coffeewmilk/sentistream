@@ -32,6 +32,9 @@ def submit_batch(vid, bucket_name="sentistream"):
     batch.runtime_config.version = "1.2"
     batch.runtime_config.container_image = "asia-southeast1-docker.pkg.dev/sentistream-420115/dataproc-artifacts/spark-nlp-image:0.0.4"
 
+    # Assign service account to batch
+    batch.environment_config.execution_config.service_account = "spark-batch@sentistream-420115.iam.gserviceaccount.com"
+
     request = dataproc_v1.CreateBatchRequest(
         parent="projects/sentistream-420115/locations/asia-southeast1",
         batch=batch,
